@@ -31,7 +31,7 @@ class AuthTokensAdapter : JsonAdapter<AuthTokens>() {
 
         reader.beginObject()
         while (reader.hasNext()) {
-            when (reader.selectName(FIELD_NAMES)) {
+            when(reader.selectName(FIELD_NAMES)) {
                 0 -> {
                     accessToken = reader.nextString()
                     accessTokenExpiration = getExpiration(accessToken)
@@ -49,14 +49,10 @@ class AuthTokensAdapter : JsonAdapter<AuthTokens>() {
         reader.endObject()
 
         return AuthTokens(
-            accessToken
-                ?: throw JsonDataException("Required property '$FIELD_NAME_ACCESS_TOKEN' missing at ${reader.path}"),
-            refreshToken
-                ?: throw JsonDataException("Required property '$FIELD_NAME_REFRESH_TOKEN' missing at ${reader.path}"),
-            accessTokenExpiration
-                ?: throw JsonDataException("Required property 'accessTokenExpiration' missing at ${reader.path}"),
-            refreshTokenExpiration
-                ?: throw JsonDataException("Required property 'refreshTokenExpiration' missing at ${reader.path}")
+            accessToken ?: throw JsonDataException("Required property '$FIELD_NAME_ACCESS_TOKEN' missing at ${reader.path}"),
+            refreshToken ?: throw JsonDataException("Required property '$FIELD_NAME_REFRESH_TOKEN' missing at ${reader.path}"),
+            accessTokenExpiration ?: throw JsonDataException("Required property 'accessTokenExpiration' missing at ${reader.path}"),
+            refreshTokenExpiration ?: throw JsonDataException("Required property 'refreshTokenExpiration' missing at ${reader.path}")
         )
     }
 

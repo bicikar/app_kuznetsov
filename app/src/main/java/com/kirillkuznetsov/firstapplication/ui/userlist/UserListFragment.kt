@@ -7,6 +7,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.DividerItemDecoration
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.kirillkuznetsov.firstapplication.ui.R
 import com.kirillkuznetsov.firstapplication.ui.base.BaseFragment
@@ -36,12 +37,16 @@ class UserListFragment : BaseFragment(R.layout.fragment_userlist) {
                 }
             }
         }
+        viewBinding.botLayout.setOnRefreshListener {
+            viewModel.loadUsers()
+        }
     }
 
     private fun setupRecyclerView(): UserAdapter {
         val recyclerView = viewBinding.usersRecyclerView
         val adapter = UserAdapter()
         recyclerView.adapter = adapter
+        viewBinding.usersRecyclerView.addItemDecoration((DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL)))
         return adapter
     }
 
@@ -53,7 +58,7 @@ class UserListFragment : BaseFragment(R.layout.fragment_userlist) {
             }
             is UserListViewModel.ViewState.Data -> {
                 viewBinding.usersRecyclerView.isVisible = true
-                (viewBinding.usersRecyclerView.adapter as UserAdapter).apply {
+                (viewBinding.usersRecyclerView.adapter as UserAdapter).apply{
                     userList = viewState.userList
                     notifyDataSetChanged()
                 }

@@ -9,19 +9,18 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.kirillkuznetsov.firstapplication.ui.R
-import com.kirillkuznetsov.firstapplication.ui.base.BaseFragment
 import com.kirillkuznetsov.firstapplication.ui.databinding.FragmentProfileBinding
-import com.kirillkuznetsov.firstapplication.ui.profile.ProfileViewModel.Event
+import com.kirillkuznetsov.firstapplication.ui.base.BaseFragment
+import com.kirillkuznetsov.firstapplication.ui.profile.ProfileViewModel.*
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
 class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
-
-    private val viewBinding by viewBinding(FragmentProfileBinding::bind)
-
     private val viewModel: ProfileViewModel by viewModels()
+    private val viewBinding by viewBinding(FragmentProfileBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -43,7 +42,7 @@ class ProfileFragment : BaseFragment(R.layout.fragment_profile) {
                             Toast
                                 .makeText(
                                     requireContext(),
-                                    R.string.common_general_error_text,
+                                    R.string.general_error,
                                     Toast.LENGTH_LONG
                                 )
                                 .show()

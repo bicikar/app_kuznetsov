@@ -24,6 +24,12 @@
     <string name="sign_up_under_email_text">Ваша почта видна только вам</string>
     <string name="sign_up_password_text_layout_hint">Пароль</string>
     <string name="sign_up_sign_up_button_text">Зарегистрироваться</string>
-    <string name="news_toolbar_title">kolbas school</string>
+    <string name="news_toolbar_title">Main news</string>
     <string name="profile_logout_button_text">Logout</string>
+    <string name="common_counter_prefix">+%1$d</string>
+    <string name="email_confirmation_send_code_again">Отправить код еще раз</string>
+    <string name="email_confirmation_send_information">Осталось t секунд</string>
+    <string name="general_error">ERROR</string>
+    <string name="email_confirmation_button_text">Подтвердить</string>
+
 </resources>

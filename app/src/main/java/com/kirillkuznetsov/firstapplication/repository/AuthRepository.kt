@@ -1,28 +1,33 @@
 package com.kirillkuznetsov.firstapplication.repository
 
-import com.haroldadmin.cnradapter.NetworkResponse
-import com.kirillkuznetsov.firstapplication.Api
+
+import com.kirillkuznetsov.firstapplication.data.network.Api
 import com.kirillkuznetsov.firstapplication.data.network.request.CreateProfileRequest
 import com.kirillkuznetsov.firstapplication.data.network.request.RefreshAuthTokensRequest
 import com.kirillkuznetsov.firstapplication.data.network.request.SignInWithEmailRequest
-import com.kirillkuznetsov.firstapplication.data.network.response.error.CreateProfileErrorResponse
-import com.kirillkuznetsov.firstapplication.data.network.response.error.RefreshAuthTokensErrorResponse
-import com.kirillkuznetsov.firstapplication.data.network.response.error.SignInWithEmailErrorResponse
+import com.kirillkuznetsov.firstapplication.data.network.response.VerificationTokenResponse
+import com.kirillkuznetsov.firstapplication.data.network.response.error.*
 import com.kirillkuznetsov.firstapplication.data.persistent.LocalKeyValueStorage
 import com.kirillkuznetsov.firstapplication.entity.AuthTokens
+import com.haroldadmin.cnradapter.NetworkResponse
+import com.kirillkuznetsov.firstapplication.di.AppCoroutineScope
+import com.kirillkuznetsov.firstapplication.di.IoCoroutineDispatcher
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
 import javax.inject.Inject
+import dagger.Lazy
 import javax.inject.Singleton
 
 @Singleton
 class AuthRepository @Inject constructor(
-    private val api: Api,
+    private val apiLazy: Lazy<Api>,
     private val localKeyValueStorage: LocalKeyValueStorage,
-    externalCoroutineScope: CoroutineScope,
-    private val ioDispatcher: CoroutineDispatcher
+    @AppCoroutineScope externalCoroutineScope: CoroutineScope,
+    @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher
+
 ) {
+    private val api by lazy { apiLazy.get() }
 
     private val authTokensFlow: Deferred<MutableStateFlow<AuthTokens?>> =
         externalCoroutineScope.async(context = ioDispatcher, start = CoroutineStart.LAZY) {
@@ -89,5 +94,19 @@ class AuthRepository @Inject constructor(
 
     suspend fun generateRefreshedAuthTokens(refreshToken: String): NetworkResponse<AuthTokens, RefreshAuthTokensErrorResponse> {
         return api.refreshAuthTokens(RefreshAuthTokensRequest(refreshToken))
+    }
+
+    suspend fun sendRegistrationVerificationCodeRequest(
+        email: String,
+    ): NetworkResponse<Unit, SendRegistrationVerificationCodeErrorResponse> {
+        return api.sendRegistrationVerificationCode(email)
+    }
+
+    suspend fun verifyRegistrationCode(
+        code: String,
+        email: String,
+        phoneNumber: String
+    ): NetworkResponse<VerificationTokenResponse, VerifyRegistrationCodeErrorResponse> {
+        return api.verifyRegistrationCode(code, email, phoneNumber)
     }
 }

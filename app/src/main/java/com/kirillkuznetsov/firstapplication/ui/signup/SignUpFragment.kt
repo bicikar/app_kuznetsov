@@ -20,13 +20,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
-import com.kirillkuznetsov.firstapplication.ui.R
 import com.kirillkuznetsov.firstapplication.ui.base.BaseFragment
+import com.kirillkuznetsov.firstapplication.ui.R
 import com.kirillkuznetsov.firstapplication.ui.databinding.FragmentSignUpBinding
 import com.kirillkuznetsov.firstapplication.util.getSpannedString
-import kotlinx.coroutines.flow.collect
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collect
 
+@AndroidEntryPoint
 class SignUpFragment : BaseFragment(R.layout.fragment_sign_up) {
     private val viewModel: SignUpViewModel by viewModels()
     private val viewBinding by viewBinding(FragmentSignUpBinding::bind)
@@ -45,24 +47,35 @@ class SignUpFragment : BaseFragment(R.layout.fragment_sign_up) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        subscribeToEvents()
         viewBinding.backButton.setOnClickListener {
             onBackButtonPressed()
         }
-
         viewBinding.signUpButton.setOnClickListener {
             viewModel.signUp(
-                firstname = viewBinding.firstnameEditText.text?.toString() ?: "",
-                lastname = viewBinding.lastnameEditText.text?.toString() ?: "",
-                nickname = viewBinding.nicknameEditText.text?.toString() ?: "",
                 email = viewBinding.emailEditText.text?.toString() ?: "",
-                password = viewBinding.passwordEditText.text?.toString() ?: ""
             )
         }
         viewBinding.termsAndConditionsCheckBox.setClubRulesText {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://policies.google.com/terms")))
         }
+        subscribeToEvents()
         subscribeToFormFields()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        val firstname = viewBinding.firstnameEditText.text?.toString() ?: ""
+        val lastname = viewBinding.lastnameEditText.text?.toString() ?: ""
+        val nickname = viewBinding.nicknameEditText.text?.toString() ?: ""
+        val password = viewBinding.passwordEditText.text?.toString() ?: ""
+        val email = viewBinding.emailEditText.text?.toString() ?: ""
+
+        outState.putString("SIGN_UP_FIRSTNAME", firstname)
+        outState.putString("SIGN_UP_LASTNAME", lastname)
+        outState.putString("SIGN_UP_NICKNAME", nickname)
+        outState.putString("SIGN_UP_PASSWORD", password)
+        outState.putString("SIGN_UP_EMAIL", email)
     }
 
     private fun subscribeToFormFields() {
@@ -96,17 +109,59 @@ class SignUpFragment : BaseFragment(R.layout.fragment_sign_up) {
         viewBinding.nicknameEditText.addTextChangedListener(watcher)
         viewBinding.emailEditText.addTextChangedListener(watcher)
         viewBinding.passwordEditText.addTextChangedListener(watcher)
-//        viewBinding.termsAndConditionsCheckBox.setOnCheckedChangeListener{buttonView, isChecked ->}
-        viewBinding.termsAndConditionsCheckBox.setOnClickListener {
+        viewBinding.termsAndConditionsCheckBox.setOnCheckedChangeListener { _, isChecked ->
             decideSignUpButtonEnabledState(
                 firstname = viewBinding.firstnameEditText.text?.toString(),
                 lastname = viewBinding.lastnameEditText.text?.toString(),
                 nickname = viewBinding.nicknameEditText.text?.toString(),
                 email = viewBinding.emailEditText.text?.toString(),
                 password = viewBinding.passwordEditText.text?.toString(),
-                termsIsChecked = viewBinding.termsAndConditionsCheckBox.isChecked
+                termsIsChecked = isChecked
             )
         }
+    }
+
+    private fun subscribeToEvents() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.signUpActionStateFlow().collect { action ->
+                    when (action) {
+                        is SignUpViewModel.SignUpActionState.EmailConfirmationRequired -> {
+                            findNavController().navigate(R.id.emailConfirmationFragment)
+                        }
+                        else -> {
+                            // Do nothing.
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun onBackButtonPressed() {
+        val firstname = viewBinding.firstnameEditText.text?.toString()
+        val lastname = viewBinding.lastnameEditText.text?.toString()
+        val nickname = viewBinding.nicknameEditText.text?.toString()
+        val email = viewBinding.emailEditText.text?.toString()
+        val password = viewBinding.passwordEditText.text?.toString()
+        if (firstname.isNullOrBlank()
+            && lastname.isNullOrBlank()
+            && nickname.isNullOrBlank()
+            && email.isNullOrBlank()
+            && password.isNullOrBlank()
+        ) {
+            findNavController().popBackStack()
+            return
+        }
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.sign_in_back_alert_dialog_text)
+            .setNegativeButton(R.string.sign_in_back_alert_dialog_cancel_button_text) { dialog, _ ->
+                dialog?.dismiss()
+            }
+            .setPositiveButton(R.string.sign_in_back_alert_dialog_ok_button_text) { _, _ ->
+                findNavController().popBackStack()
+            }
+            .show()
     }
 
     private fun decideSignUpButtonEnabledState(
@@ -124,42 +179,6 @@ class SignUpFragment : BaseFragment(R.layout.fragment_sign_up) {
                 && !password.isNullOrBlank()
                 && termsIsChecked
     }
-
-    private fun onBackButtonPressed() {
-        val email = viewBinding.emailEditText.text?.toString()
-        val password = viewBinding.passwordEditText.text?.toString()
-        if (email.isNullOrBlank() && password.isNullOrBlank()) {
-            findNavController().popBackStack()
-            return
-        }
-        AlertDialog.Builder(requireContext())
-            .setTitle(R.string.sign_in_back_alert_dialog_text)
-            .setNegativeButton(R.string.sign_in_back_alert_dialog_cancel_button_text) { dialog, _ ->
-                dialog?.dismiss()
-            }
-            .setPositiveButton(R.string.sign_in_back_alert_dialog_ok_button_text) { _, _ ->
-                findNavController().popBackStack()
-            }
-            .show()
-    }
-
-    private fun subscribeToEvents() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.eventsFlow().collect { event ->
-                    when (event) {
-                        is SignUpViewModel.Event.SignUpEmailConfirmationRequired -> {
-                            findNavController().navigate(R.id.emailConfirmationFragment)
-                        }
-                        else -> {
-                            // Do nothing.
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     private fun CheckBox.setClubRulesText(
         clubRulesClickListener: () -> Unit
     ) {

@@ -9,7 +9,7 @@ import android.view.Gravity
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.core.view.isInvisible
-import com.kirillkuznetsov.firstapplication.R
+import com.kirillkuznetsov.firstapplication.ui.R
 import com.kirillkuznetsov.firstapplication.util.dpToPx
 import com.kirillkuznetsov.firstapplication.util.getCompatColor
 import com.kirillkuznetsov.firstapplication.util.inflate
@@ -41,7 +41,7 @@ class PostLikesView @JvmOverloads constructor(
     private var circleBorderPaint: Paint =
         Paint()
             .apply {
-                color = context.getCompatColor(R.color.color_post_like_border)
+                color = context.getCompatColor(R.color.gray)
                 strokeWidth = dpToPx(2f)
                 style = Paint.Style.STROKE
             }

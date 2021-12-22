@@ -2,10 +2,13 @@ package com.kirillkuznetsov.firstapplication.ui.onboarding
 
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.kirillkuznetsov.firstapplication.ui.base.BaseFragment
+import com.kirillkuznetsov.firstapplication.ui.R
+import com.kirillkuznetsov.firstapplication.ui.databinding.FragmentOnboardingBinding
+import com.kirillkuznetsov.firstapplication.onboardingTextAdapterDelegate
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
@@ -13,11 +16,9 @@ import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.hannesdorfmann.adapterdelegates4.ListDelegationAdapter
-import com.kirillkuznetsov.firstapplication.onboardingTextAdapterDelegate
-import com.kirillkuznetsov.firstapplication.ui.R
-import com.kirillkuznetsov.firstapplication.ui.databinding.FragmentOnboardingBinding
+import dev.chrisbanes.insetter.applyInsetter
 
-class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
+class OnboardingFragment : BaseFragment(R.layout.fragment_onboarding) {
 
     private val viewBinding by viewBinding(FragmentOnboardingBinding::bind)
     private var player: ExoPlayer? = null
@@ -36,9 +37,15 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewBinding.volumeControlButton.applyInsetter {
+            type(statusBars = true) { margin() }
+        }
+        viewBinding.signUpButton.applyInsetter {
+            type(navigationBars = true) { margin() }
+        }
         viewBinding.playerView.player = player
         viewBinding.viewPager.setTextPages()
-        viewBinding.viewPager.attachDots(viewBinding.onboardingTextTabLayout)
+        viewBinding.viewPager.attachDots(viewBinding.onboaringTextTabLayout)
         viewBinding.signInButton.setOnClickListener {
             findNavController().navigate(R.id.action_onboardingFragment_to_signInFragment)
         }
@@ -100,6 +107,5 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
     private fun ViewPager2.attachDots(tabLayout: TabLayout) {
         TabLayoutMediator(tabLayout, this) { _, _ -> }.attach()
     }
-}
 
-//viewBinding.viewPager.attachDots(viewBinding.onboardingTextTabLayout)
+}

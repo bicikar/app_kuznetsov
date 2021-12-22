@@ -1,13 +1,12 @@
 package com.kirillkuznetsov.firstapplication.di.module
 
 import android.os.Build
-import com.haroldadmin.cnradapter.NetworkResponseAdapterFactory
-import com.kirillkuznetsov.firstapplication.BuildConfig
 import com.kirillkuznetsov.firstapplication.data.network.Api
+import com.kirillkuznetsov.firstapplication.ui.BuildConfig
+import com.haroldadmin.cnradapter.NetworkResponseAdapterFactory
 import com.kirillkuznetsov.firstapplication.data.network.MockApi
 import com.kirillkuznetsov.firstapplication.data.network.interceptor.AuthorizationInterceptor
 import com.kirillkuznetsov.firstapplication.data.network.interceptor.FirstApplicationAuthenticator
-import com.kirillkuznetsov.firstapplication.data.network.interceptor.UserAgentInterceptor
 import com.kirillkuznetsov.firstapplication.repository.AuthRepository
 import com.squareup.moshi.Moshi
 import dagger.Module
@@ -45,7 +44,7 @@ object NetworkModule {
             .apply {
                 readTimeout(60, TimeUnit.SECONDS)
                 connectTimeout(60, TimeUnit.SECONDS)
-                addNetworkInterceptor(UserAgentInterceptor(userAgent))
+//                addNetworkInterceptor(UserAgentInterceptor(userAgent))
                 addNetworkInterceptor(AuthorizationInterceptor(authRepository))
                 authenticator(FirstApplicationAuthenticator(authRepository))
                 if (BuildConfig.DEBUG) {

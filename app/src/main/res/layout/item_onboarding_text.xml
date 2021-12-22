@@ -7,4 +7,5 @@
     android:gravity="center"
     android:textAppearance="@style/TextAppearance.MaterialComponents.Headline4"
     android:textColor="#000000"
-    tools:text="Test text" />
+    tools:text="Test text"
+    android:background="@drawable/cloud"/>

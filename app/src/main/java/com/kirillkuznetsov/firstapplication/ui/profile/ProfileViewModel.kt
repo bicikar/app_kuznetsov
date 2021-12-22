@@ -15,25 +15,24 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val authInteractor: AuthInteractor
 ) : BaseViewModel() {
-
     private val _eventChannel = Channel<Event>(Channel.BUFFERED)
 
-    fun evenetsFlow(): Flow<Event> {
+    fun eventsFlow(): Flow<Event> {
         return _eventChannel.receiveAsFlow()
     }
 
-    fun logout(){
+    fun logout() {
         viewModelScope.launch {
             try {
                 authInteractor.logout()
-            } catch (error: Throwable){
+            } catch (error: Throwable) {
                 Timber.e(error)
                 _eventChannel.send(Event.LogoutError(error))
             }
         }
     }
 
-    sealed class Event{
-        data class LogoutError(val error: Throwable): Event()
+    sealed class Event {
+        data class LogoutError(val error: Throwable) : Event()
     }
 }

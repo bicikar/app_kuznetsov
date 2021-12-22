@@ -14,8 +14,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserListViewModel @Inject constructor(
-    private val usersInteractor: UsersInteractor
-) : BaseViewModel() {
+    private val usersInteractor : UsersInteractor
+): BaseViewModel() {
+
     sealed class ViewState {
         object Loading : ViewState()
         data class Data(val userList: List<User>) : ViewState()
@@ -28,15 +29,15 @@ class UserListViewModel @Inject constructor(
         loadUsers()
     }
 
-    private fun loadUsers() {
+    internal fun loadUsers() {
         viewModelScope.launch {
             _viewState.emit(ViewState.Loading)
-            when(val response = usersInteractor.loadUsers()){
-                is NetworkResponse.Success ->{
+            when (val response = usersInteractor.loadUsers()) {
+                is NetworkResponse.Success -> {
                     _viewState.emit(ViewState.Data(response.body))
                 }
                 else -> {
-//                    something
+                    // Something...
                 }
             }
         }
