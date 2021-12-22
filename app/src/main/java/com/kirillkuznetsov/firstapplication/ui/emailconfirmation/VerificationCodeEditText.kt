@@ -8,53 +8,59 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import com.kirillkuznetsov.firstapplication.ui.R
 import com.kirillkuznetsov.firstapplication.ui.databinding.ViewVerificationCodeEditTextBinding
 import java.lang.Math.min
+import kotlin.properties.Delegates
+
 
 class VerificationCodeEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-    defStyleRes: Int = 0
+    defStyleRes: Int = 0,
 ) : ConstraintLayout(context, attrs, defStyleAttr, defStyleRes) {
+
+    private var slotsNumber by Delegates.notNull<Int>()
 
     private val viewBinding =
         ViewVerificationCodeEditTextBinding.inflate(LayoutInflater.from(context), this)
 
-    private val slotViews: List<VerificationCodeSlotView> =
-        listOf(
-            viewBinding.slot1,
-            viewBinding.slot2,
-            viewBinding.slot3,
-            viewBinding.slot4,
-            viewBinding.slot5,
-            viewBinding.slot6
-        )
+    private val slotViews: MutableList<VerificationCodeSlotView> = mutableListOf()
 
-    private val slotValues: Array<CharSequence?> = Array(6) { null }
+    private lateinit var slotValues: Array<CharSequence?>
 
     var onVerificationCodeFilledListener: (String) -> Unit = {}
 
     var onVerificationCodeFilledChangeListener: (Boolean) -> Unit = {}
 
     init {
+        context.obtainStyledAttributes(attrs, R.styleable.VerificationCodeEditText , defStyleAttr, defStyleRes).apply {
+            slotsNumber = getInt(R.styleable.VerificationCodeEditText_slotsNumber, 4)
+        }
+        val linearLayout = viewBinding.codeEditContainer
+        for (i in 0 until slotsNumber) {
+            LayoutInflater.from(context).inflate(
+                R.layout.view_verification_code_linear_layout_element, linearLayout
+            )
+        }
+        slotViews.apply {
+            for (i in 0 until slotsNumber) {
+                this.add(linearLayout.getChildAt(i) as VerificationCodeSlotView)
+            }
+        }
+        slotValues = Array(slotsNumber) { null }
+
         viewBinding.realVerificationCodeEditText.addTextChangedListener(
 
             object : TextWatcher {
 
                 private var wasClearedLastSlot = false
 
-                override fun beforeTextChanged(
-                    s: CharSequence,
-                    start: Int,
-                    count: Int,
-                    after: Int
-                ) {
-                }
+                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
                 override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                    wasClearedLastSlot =
-                        !wasClearedLastSlot && start + before == slotViews.size && count == 0
+                    wasClearedLastSlot = !wasClearedLastSlot && start + before == slotViews.size && count == 0
                 }
 
                 override fun afterTextChanged(s: Editable) {
@@ -129,7 +135,5 @@ class VerificationCodeEditText @JvmOverloads constructor(
         all { it != null }
 
     private fun Array<CharSequence?>.toCodeString(): String =
-        joinToString(separator = "", prefix = "", postfix = "", limit = -1, truncated = "") {
-            it ?: ""
-        }
+        joinToString(separator = "", prefix = "", postfix = "", limit = -1, truncated = "") { it ?: "" }
 }

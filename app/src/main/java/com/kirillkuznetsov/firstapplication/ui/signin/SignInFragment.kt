@@ -1,5 +1,7 @@
 package com.kirillkuznetsov.firstapplication.ui.signin
 
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
@@ -8,16 +10,15 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
-import com.kirillkuznetsov.firstapplication.ui.R
 import com.kirillkuznetsov.firstapplication.ui.base.BaseFragment
+import com.kirillkuznetsov.firstapplication.ui.R
 import com.kirillkuznetsov.firstapplication.ui.databinding.FragmentSignInBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SignInFragment : BaseFragment(R.layout.fragment_sign_in) {
-
-    private val viewBinding by viewBinding(FragmentSignInBinding::bind)
-
     private val viewModel: SignInViewModel by viewModels()
-
+    private val viewBinding by viewBinding(FragmentSignInBinding::bind)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +34,7 @@ class SignInFragment : BaseFragment(R.layout.fragment_sign_in) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        animateLogo()
         viewBinding.backButton.setOnClickListener {
             onBackButtonPressed()
         }
@@ -83,6 +85,15 @@ class SignInFragment : BaseFragment(R.layout.fragment_sign_in) {
     }
 
     private fun decideSignInButtonEnabledState(email: String?, password: String?) {
-        viewBinding.signInButton.isEnabled = !(email.isNullOrBlank() || password.isNullOrBlank())
+        viewBinding.signInButton.isEnabled = (!email.isNullOrBlank() && !password.isNullOrBlank())
+    }
+
+    private fun animateLogo() {
+        ObjectAnimator.ofFloat(viewBinding.mknLogoImageView, "translationY", -500f, 1000f).apply {
+            duration = 2000
+            repeatMode = ValueAnimator.REVERSE
+            repeatCount = ValueAnimator.INFINITE
+            start()
+        }
     }
 }
